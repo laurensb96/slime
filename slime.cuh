@@ -10,10 +10,12 @@
 #define WINDOW_HEIGHT 1080
 
 #define NUM_AGENTS 1e6
-#define MOVE_SPEED 25.f
 #define DELTA_TIME 0.02f
-#define EVAPORATE_SPEED 100.f
+
+#define MOVE_SPEED 25.f
 #define TURN_SPEED 10.f
+#define DIFFUSE_SPEED 10.f
+#define EVAPORATE_SPEED 10.f
 
 struct Agent {
     float2 position;

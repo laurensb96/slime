@@ -149,9 +149,29 @@ void processTrailMap(uint n, struct TrailMap *trailMap)
   for (uint i = index; i < n; i += stride)
   {
     float originalValue = trailMap[i].val;
-    float evaporatedValue = max(0.f, originalValue - EVAPORATE_SPEED * DELTA_TIME);
 
-    trailMap[i].val = evaporatedValue;
+    float sum = 0;
+    for (int offsetX = -1; offsetX <= 1; offsetX++)
+    {
+      for (int offsetY = -1; offsetY <= 1; offsetY++)
+      {
+        int sampleX = trailMap[i].x + offsetX;
+        int sampleY = trailMap[i].y + offsetY;
+
+        if(sampleX >= 0 && sampleX < WINDOW_WIDTH && sampleY >= 0 && sampleY < WINDOW_HEIGHT)
+        {
+          sum += trailMap[i].val;
+        }
+
+        float blurResult = sum / 9;
+
+        float alpha = min(1.0f, DIFFUSE_SPEED * DELTA_TIME);
+        float diffusedValue = originalValue*(1-alpha) + blurResult*alpha;
+        float diffusedAndEvaporatedValue = max(0.f, diffusedValue - EVAPORATE_SPEED * DELTA_TIME);
+
+        trailMap[i].val = diffusedAndEvaporatedValue;
+      }
+    }
   }
 }
 

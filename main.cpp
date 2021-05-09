@@ -45,7 +45,9 @@ int main()
     sf::Sprite sprite;
     texture.create(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    sf::Uint8 x;
+    uint count = 0;
+    clock_t t;
+    t = clock();
 
     while (window.isOpen())
     {
@@ -61,6 +63,14 @@ int main()
       window.clear(sf::Color::White);
       window.draw(sprite);
       window.display();
+      count++;
+
+      if((float) ((clock() - t) / CLOCKS_PER_SEC) >= 2.f)
+      {
+        std::cout << '\r' << "Average FPS: " << (float) count/2.f << std::flush;
+        count = 0;
+        t = clock();
+      }
      }
 
     cudaFree(agents);
