@@ -12,10 +12,10 @@
 #define NUM_AGENTS 1e6
 #define DELTA_TIME 0.02f
 
-#define MOVE_SPEED 25.f
-#define TURN_SPEED 10.f
-#define DIFFUSE_SPEED 10.f
-#define EVAPORATE_SPEED 10.f
+#define MOVE_SPEED 50.f
+#define TURN_SPEED 30.f
+#define DIFFUSE_SPEED 5.f
+#define EVAPORATE_SPEED 50.f
 
 struct Agent {
     float2 position;

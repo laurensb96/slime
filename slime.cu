@@ -33,7 +33,7 @@ uint hash(uint state)
 __global__
 void senseMap(uint n, struct TrailMap *trailMap)
 {
-  static int sensorSize = 5;
+  static int sensorSize = 2;
 
   uint index = blockIdx.x * blockDim.x + threadIdx.x;
   uint stride = blockDim.x * gridDim.x;
@@ -182,9 +182,9 @@ void setPixels(uint n, struct TrailMap *trailMap, sf::Uint8 *pixels)
   uint stride = blockDim.x * gridDim.x;
   for (uint i = index; i < n; i += stride)
   {
-    pixels[4*i] = 0;
-    pixels[4*i+1] = pow(trailMap[i].val,2)/255*0.6;
-    pixels[4*i+2] = trailMap[i].val;
+    pixels[4*i] = pow(trailMap[i].val,3)/(255*255)*0.8;
+    pixels[4*i+1] = pow(trailMap[i].val,2)/255*0.8;
+    pixels[4*i+2] = trailMap[i].val*0.6;
     pixels[4*i+3] = 255;
   }
 }

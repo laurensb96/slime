@@ -2,7 +2,7 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode((int) WINDOW_WIDTH, (int) WINDOW_HEIGHT), "Slime Simulation");
+    sf::RenderWindow window(sf::VideoMode((int) WINDOW_WIDTH, (int) WINDOW_HEIGHT), "Slime Simulation", sf::Style::Fullscreen);
 
     uint numPixels = WINDOW_WIDTH*WINDOW_HEIGHT;
     uint numAgents = NUM_AGENTS;
@@ -32,8 +32,8 @@ int main()
     uint random;
     for (uint i = 0; i < numAgents; i++)
     {
-      agents[i].position.x = (uint) ((float) rand()/RAND_MAX * WINDOW_WIDTH*0.8)+WINDOW_WIDTH*0.1;
-      agents[i].position.y = (uint) ((float) rand()/RAND_MAX * WINDOW_HEIGHT*0.8)+WINDOW_HEIGHT*0.1;
+      agents[i].position.x = (uint) ((float) rand()/RAND_MAX * WINDOW_WIDTH*1)+WINDOW_WIDTH*0;
+      agents[i].position.y = (uint) ((float) rand()/RAND_MAX * WINDOW_HEIGHT*1)+WINDOW_HEIGHT*0;
       agents[i].angle = (uint) ((float) rand()/RAND_MAX * 2 * M_PI);
     }
 
@@ -55,6 +55,11 @@ int main()
       while (window.pollEvent(event))
       {
         if (event.type == sf::Event::Closed) window.close();
+
+        if (event.type == sf::Event::KeyPressed) 
+        {
+          if(event.key.code == sf::Keyboard::Escape) window.close();
+        }
       }
       
       CUDA::wrapper(numAgents, agents, trailMap, pixels);
