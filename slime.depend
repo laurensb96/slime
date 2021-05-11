@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1620773386 source:/home/laurens/Documents/CodeBlocks/slime/main.cpp
+	"slime.cuh"
+
+1620756136 /home/laurens/Documents/CodeBlocks/slime/slime.cuh
+	"cuda_runtime.h"
+	"device_launch_parameters.h"
+	<iostream>
+	<SFML/Graphics.hpp>
+	<math.h>
+
+1620773390 source:/home/laurens/Documents/CodeBlocks/slime/slime.cu
+	"slime.cuh"
+

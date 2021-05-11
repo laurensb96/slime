@@ -89,13 +89,14 @@ int main()
       {
         if (event.type == sf::Event::Closed) window.close();
 
-        if (event.type == sf::Event::KeyPressed) 
+        if (event.type == sf::Event::KeyPressed)
         {
           if(event.key.code == sf::Keyboard::Escape) window.close();
         }
       }
-      
+
       CUDA::wrapper(numAgents, agents, trailMap, trailMapUpdated, pixels);
+
       texture.update(pixels);
       sprite.setTexture(texture);
       window.clear(sf::Color::White);
@@ -115,6 +116,8 @@ int main()
     cudaFree(trailMap);
     cudaFree(trailMapUpdated);
     cudaFree(pixels);
+
+    std::cout << std::endl << "Exiting program..." << std::endl;
 
     return 0;
 }

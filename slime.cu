@@ -157,7 +157,7 @@ uint sense(struct Agent *agent, float sensorAngleOffset, struct TrailMap *trailM
   int2 sensorCentre;
   sensorCentre.x = agent->position.x + sensorDir.x * sensorOffsetDst;
   sensorCentre.y = agent->position.y + sensorDir.y * sensorOffsetDst;
-  
+
   uint senseVal;
   uint3 vect1;
   vect1.x = 1;
@@ -184,7 +184,7 @@ void update(uint n, struct Agent *agents, struct TrailMap *trailMap)
     Agent agent = agents[i];
 
     uint random = hash(agent.position.y * WINDOW_WIDTH + agent.position.x + hash(i % WINDOW_WIDTH));
-  
+
     uint weightForward = sense(&agent, 0, trailMap);
     uint weightLeft = sense(&agent, sensorAngleSpacing, trailMap);
     uint weightRight = sense(&agent, -sensorAngleSpacing, trailMap);
