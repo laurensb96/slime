@@ -1,4 +1,4 @@
-#include "slime.cuh"
+#include "main.hpp"
 
 __device__
 float2 operator+(float2 a, float2 b)

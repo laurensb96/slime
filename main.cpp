@@ -1,4 +1,4 @@
-#include "slime.cuh"
+#include "main.hpp"
 
 int main()
 {
