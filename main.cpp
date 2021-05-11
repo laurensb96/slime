@@ -25,12 +25,20 @@ int main()
       {
         trailMap[v*WINDOW_WIDTH+u].x = u;
         trailMap[v*WINDOW_WIDTH+u].y = v;
-        trailMap[v*WINDOW_WIDTH+u].val = 0;
-        trailMap[v*WINDOW_WIDTH+u].sense = 0;
+        trailMap[v*WINDOW_WIDTH+u].val.x = 0;
+        trailMap[v*WINDOW_WIDTH+u].val.y = 0;
+        trailMap[v*WINDOW_WIDTH+u].val.z = 0;
+        trailMap[v*WINDOW_WIDTH+u].sense.x = 0;
+        trailMap[v*WINDOW_WIDTH+u].sense.y = 0;
+        trailMap[v*WINDOW_WIDTH+u].sense.z = 0;
         trailMapUpdated[v*WINDOW_WIDTH+u].x = u;
         trailMapUpdated[v*WINDOW_WIDTH+u].y = v;
-        trailMapUpdated[v*WINDOW_WIDTH+u].val = 0;
-        trailMapUpdated[v*WINDOW_WIDTH+u].sense = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].val.x = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].val.y = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].val.z = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].sense.x = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].sense.y = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].sense.z = 0;
       }
     }
 
@@ -42,6 +50,24 @@ int main()
       agents[i].position.x = WINDOW_WIDTH/2;
       agents[i].position.y = WINDOW_HEIGHT/2;
       agents[i].angle = ((float) rand()/RAND_MAX * 2 * M_PI);
+      if(i < numAgents/3)
+      {
+        agents[i].speciesMask.x = 1;
+        agents[i].speciesMask.y = 0;
+        agents[i].speciesMask.z = 0;
+      }
+      else if(i < numAgents*2/3)
+      {
+        agents[i].speciesMask.x = 0;
+        agents[i].speciesMask.y = 1;
+        agents[i].speciesMask.z = 0;
+      }
+      else
+      {
+        agents[i].speciesMask.x = 0;
+        agents[i].speciesMask.y = 0;
+        agents[i].speciesMask.z = 1;
+      }
     }
 
     sf::Image img;

@@ -8,23 +8,24 @@
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
-#define NUM_AGENTS 1e6
-#define DELTA_TIME 0.02f
+#define NUM_AGENTS 900e3;
+#define DELTA_TIME 0.04f
 
 #define MOVE_SPEED 50.f
-#define TURN_SPEED 20.f
+#define TURN_SPEED 50.f
 #define DIFFUSE_SPEED 20.f
-#define EVAPORATE_SPEED 50.f
+#define EVAPORATE_SPEED 20.f
 
 struct Agent {
     float2 position;
     float angle;
+    uint3 speciesMask;
 };
 
 struct TrailMap {
     uint x, y;
-    uint8_t val;
-    uint sense;
+    uint3 val;
+    uint3 sense;
 };
 
 namespace CUDA {

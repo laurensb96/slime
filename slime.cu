@@ -19,6 +19,84 @@ float2 operator*(float2 a, float b)
 }
 
 __device__
+float3 operator/(float3 a, int b)
+{
+  float3 out;
+  out.x = a.x/b;
+  out.y = a.y/b;
+  out.z = a.z/b;
+  return out;
+}
+
+__device__
+float3 operator*(float3 a, float b)
+{
+  float3 out;
+  out.x = a.x*b;
+  out.y = a.y*b;
+  out.z = a.z*b;
+  return out;
+}
+
+__device__
+float3 operator+(float3 a, float3 b)
+{
+  float3 out;
+  out.x = a.x + b.x;
+  out.y = a.y + b.y;
+  out.z = a.z + b.z;
+  return out;
+}
+
+__device__
+float3 operator-(float3 a, float3 b)
+{
+  float3 out;
+  out.x = a.x - b.x;
+  out.y = a.y - b.y;
+  out.z = a.z - b.z;
+  return out;
+}
+
+__device__
+uint3 operator+(uint3 a, uint3 b)
+{
+  uint3 out;
+  out.x = a.x + b.x;
+  out.y = a.y + b.y;
+  out.z = a.z + b.z;
+  return out;
+}
+
+__device__
+uint3 operator-(uint3 a, uint3 b)
+{
+  uint3 out;
+  out.x = a.x - b.x;
+  out.y = a.y - b.y;
+  out.z = a.z - b.z;
+  return out;
+}
+
+__device__
+uint3 operator*(uint3 a, uint b)
+{
+  uint3 out;
+  out.x = a.x * b;
+  out.y = a.y * b;
+  out.z = a.z * b;
+  return out;
+}
+
+__device__
+int dot(uint3 a, uint3 b)
+{
+  int out;
+  out = a.x*b.x + a.y*b.y + a.z*b.z;
+  return out;
+}
+
+__device__
 uint hash(uint state)
 {
   state ^= 2747636419u;
@@ -43,7 +121,10 @@ void senseMap(uint n, struct TrailMap *trailMap)
     sensorCentre.x = trailMap[i].x;
     sensorCentre.y = trailMap[i].y;
 
-    uint sum = 0;
+    uint3 sum;
+    sum.x = 0;
+    sum.y = 0;
+    sum.z = 0;
 
     for (int offsetX = -sensorSize; offsetX <= sensorSize; offsetX++)
     {
@@ -55,7 +136,7 @@ void senseMap(uint n, struct TrailMap *trailMap)
 
         if(pos.x >= 0 && pos.x < WINDOW_WIDTH && pos.y >= 0 && pos.y < WINDOW_HEIGHT)
         {
-          sum += trailMap[pos.y * WINDOW_WIDTH + pos.x].val;
+          sum = sum + trailMap[pos.y * WINDOW_WIDTH + pos.x].val;
         }
       }
     }
@@ -78,10 +159,14 @@ uint sense(struct Agent *agent, float sensorAngleOffset, struct TrailMap *trailM
   sensorCentre.y = agent->position.y + sensorDir.y * sensorOffsetDst;
   
   uint senseVal;
+  uint3 vect1;
+  vect1.x = 1;
+  vect1.y = 1;
+  vect1.z = 1;
 
   if(sensorCentre.x >= 0 && sensorCentre.x < WINDOW_WIDTH && sensorCentre.y >= 0 && sensorCentre.y < WINDOW_HEIGHT)
   {
-    senseVal = trailMap[sensorCentre.y * WINDOW_WIDTH + sensorCentre.x].sense;
+    senseVal = dot(trailMap[sensorCentre.y * WINDOW_WIDTH + sensorCentre.x].sense, agent->speciesMask * 2 - vect1);
   }
 
   return senseVal;
@@ -137,7 +222,7 @@ void update(uint n, struct Agent *agents, struct TrailMap *trailMap)
     }
 
     agents[i].position = newPos;
-    trailMap[(uint) newPos.y * WINDOW_WIDTH + (uint) newPos.x].val = 255;
+    trailMap[(uint) newPos.y * WINDOW_WIDTH + (uint) newPos.x].val = agents[i].speciesMask*255;
   }
 }
 
@@ -148,9 +233,16 @@ void processTrailMap(uint n, struct TrailMap *trailMap, struct TrailMap *trailMa
   uint stride = blockDim.x * gridDim.x;
   for (uint i = index; i < n; i += stride)
   {
-    float originalValue = trailMap[i].val;
+    float3 originalValue;
+    originalValue.x = (float) trailMap[i].val.x;
+    originalValue.y = (float) trailMap[i].val.y;
+    originalValue.z = (float) trailMap[i].val.z;
 
-    float sum = 0;
+    float3 sum;
+    sum.x = 0;
+    sum.y = 0;
+    sum.z = 0;
+
     for (int offsetX = -1; offsetX <= 1; offsetX++)
     {
       for (int offsetY = -1; offsetY <= 1; offsetY++)
@@ -160,16 +252,23 @@ void processTrailMap(uint n, struct TrailMap *trailMap, struct TrailMap *trailMa
 
         if(sampleX >= 0 && sampleX < WINDOW_WIDTH && sampleY >= 0 && sampleY < WINDOW_HEIGHT)
         {
-          sum += trailMap[sampleY*WINDOW_WIDTH + sampleX].val;
+          sum.x += trailMap[sampleY*WINDOW_WIDTH + sampleX].val.x;
+          sum.y += trailMap[sampleY*WINDOW_WIDTH + sampleX].val.y;
+          sum.z += trailMap[sampleY*WINDOW_WIDTH + sampleX].val.z;
         }
 
-        float blurResult = sum / 9;
+        float3 blurResult = sum / 9;
 
         float alpha = min(1.0f, DIFFUSE_SPEED * DELTA_TIME);
-        float diffusedValue = originalValue*(1-alpha) + blurResult*alpha;
-        float diffusedAndEvaporatedValue = max(0.f, diffusedValue - EVAPORATE_SPEED * DELTA_TIME);
+        float3 diffusedValue = originalValue*(1-alpha) + blurResult*alpha;
+        float3 diffusedAndEvaporatedValue;
+        diffusedAndEvaporatedValue.x = max(0.f, diffusedValue.x - EVAPORATE_SPEED * DELTA_TIME);
+        diffusedAndEvaporatedValue.y = max(0.f, diffusedValue.y - EVAPORATE_SPEED * DELTA_TIME);
+        diffusedAndEvaporatedValue.z = max(0.f, diffusedValue.z - EVAPORATE_SPEED * DELTA_TIME);
 
-        trailMapUpdated[i].val = (uint) diffusedAndEvaporatedValue;
+        trailMapUpdated[i].val.x = (uint) diffusedAndEvaporatedValue.x;
+        trailMapUpdated[i].val.y = (uint) diffusedAndEvaporatedValue.y;
+        trailMapUpdated[i].val.z = (uint) diffusedAndEvaporatedValue.z;
       }
     }
   }
@@ -193,9 +292,9 @@ void setPixels(uint n, struct TrailMap *trailMap, sf::Uint8 *pixels)
   uint stride = blockDim.x * gridDim.x;
   for (uint i = index; i < n; i += stride)
   {
-    pixels[4*i] = trailMap[i].val*0.8;
-    pixels[4*i+1] = pow(trailMap[i].val,2)/255*0.5;
-    pixels[4*i+2] = pow(trailMap[i].val,2)/255*0.5;
+    pixels[4*i] = trailMap[i].val.x;
+    pixels[4*i+1] = trailMap[i].val.y;
+    pixels[4*i+2] = trailMap[i].val.z;
     pixels[4*i+3] = 255;
   }
 }
