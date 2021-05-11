@@ -77,14 +77,14 @@ uint sense(struct Agent *agent, float sensorAngleOffset, struct TrailMap *trailM
   sensorCentre.x = agent->position.x + sensorDir.x * sensorOffsetDst;
   sensorCentre.y = agent->position.y + sensorDir.y * sensorOffsetDst;
   
-  uint sum;
+  uint senseVal;
 
   if(sensorCentre.x >= 0 && sensorCentre.x < WINDOW_WIDTH && sensorCentre.y >= 0 && sensorCentre.y < WINDOW_HEIGHT)
   {
-    sum = trailMap[sensorCentre.y * WINDOW_WIDTH + sensorCentre.x].sense;
+    senseVal = trailMap[sensorCentre.y * WINDOW_WIDTH + sensorCentre.x].sense;
   }
 
-  return sum;
+  return senseVal;
 }
 
 __global__
@@ -133,7 +133,7 @@ void update(uint n, struct Agent *agents, struct TrailMap *trailMap)
     {
       newPos.x = min(WINDOW_WIDTH-0.01f, max(0.f, newPos.x));
       newPos.y = min(WINDOW_HEIGHT-0.01f, max(0.f, newPos.y));
-      agents[i].angle = (random/4294967295.0) * 2 * M_PI;
+      agents[i].angle = randomSteerStrength * 2 * M_PI;
     }
 
     agents[i].position = newPos;
@@ -142,7 +142,7 @@ void update(uint n, struct Agent *agents, struct TrailMap *trailMap)
 }
 
 __global__
-void processTrailMap(uint n, struct TrailMap *trailMap)
+void processTrailMap(uint n, struct TrailMap *trailMap, struct TrailMap *trailMapUpdated)
 {
   uint index = blockIdx.x * blockDim.x + threadIdx.x;
   uint stride = blockDim.x * gridDim.x;
@@ -160,7 +160,7 @@ void processTrailMap(uint n, struct TrailMap *trailMap)
 
         if(sampleX >= 0 && sampleX < WINDOW_WIDTH && sampleY >= 0 && sampleY < WINDOW_HEIGHT)
         {
-          sum += trailMap[i].val;
+          sum += trailMap[sampleY*WINDOW_WIDTH + sampleX].val;
         }
 
         float blurResult = sum / 9;
@@ -169,9 +169,20 @@ void processTrailMap(uint n, struct TrailMap *trailMap)
         float diffusedValue = originalValue*(1-alpha) + blurResult*alpha;
         float diffusedAndEvaporatedValue = max(0.f, diffusedValue - EVAPORATE_SPEED * DELTA_TIME);
 
-        trailMap[i].val = diffusedAndEvaporatedValue;
+        trailMapUpdated[i].val = (uint) diffusedAndEvaporatedValue;
       }
     }
+  }
+}
+
+__global__
+void copyTrailMap(uint n, struct TrailMap *trailMap, struct TrailMap *trailMapUpdated)
+{
+  uint index = blockIdx.x * blockDim.x + threadIdx.x;
+  uint stride = blockDim.x * gridDim.x;
+  for (uint i = index; i < n; i += stride)
+  {
+    trailMap[i].val = trailMapUpdated[i].val;
   }
 }
 
@@ -182,14 +193,14 @@ void setPixels(uint n, struct TrailMap *trailMap, sf::Uint8 *pixels)
   uint stride = blockDim.x * gridDim.x;
   for (uint i = index; i < n; i += stride)
   {
-    pixels[4*i] = pow(trailMap[i].val,3)/(255*255)*0.8;
-    pixels[4*i+1] = pow(trailMap[i].val,2)/255*0.8;
-    pixels[4*i+2] = trailMap[i].val*0.6;
+    pixels[4*i] = trailMap[i].val*0.8;
+    pixels[4*i+1] = pow(trailMap[i].val,2)/255*0.5;
+    pixels[4*i+2] = pow(trailMap[i].val,2)/255*0.5;
     pixels[4*i+3] = 255;
   }
 }
 
-void CUDA::wrapper(uint n, struct Agent *agents, struct TrailMap *trailMap, sf::Uint8 *pixels)
+void CUDA::wrapper(uint n, struct Agent *agents, struct TrailMap *trailMap, struct TrailMap *trailMapUpdated, sf::Uint8 *pixels)
 {
   // Run kernel on 1M elements on the GPU
   int blockSize = 256;
@@ -198,7 +209,9 @@ void CUDA::wrapper(uint n, struct Agent *agents, struct TrailMap *trailMap, sf::
 
   update<<<numBlocks, blockSize>>>(n, agents, trailMap);
 
-  processTrailMap<<<numBlocks, blockSize>>>(WINDOW_WIDTH*WINDOW_HEIGHT, trailMap);
+  processTrailMap<<<numBlocks, blockSize>>>(WINDOW_WIDTH*WINDOW_HEIGHT, trailMap, trailMapUpdated);
+
+  copyTrailMap<<<numBlocks, blockSize>>>(WINDOW_WIDTH*WINDOW_HEIGHT, trailMap, trailMapUpdated);
 
   setPixels<<<numBlocks, blockSize>>>(WINDOW_WIDTH*WINDOW_HEIGHT, trailMap, pixels);
 

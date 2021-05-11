@@ -9,14 +9,15 @@ int main()
     std::cout << "number of pixels in render: " << numPixels << std::endl;
     std::cout << "number of agents: " << numAgents << std::endl;
 
-    struct Agent *agentsGPU, *agents;
-    struct TrailMap *trailMap;
-    sf::Uint8 *pixels;
+    struct Agent *agents;
+    struct TrailMap *trailMap, *trailMapUpdated;
+    uint8_t *pixels;
 
     // Allocate Unified Memory – accessible from CPU or GPU
     cudaMallocManaged(&agents, numAgents*sizeof(struct Agent));
     cudaMallocManaged(&trailMap, numPixels*sizeof(struct TrailMap));
-    cudaMallocManaged(&pixels, numPixels*4*sizeof(sf::Uint8));
+    cudaMallocManaged(&trailMapUpdated, numPixels*sizeof(struct TrailMap));
+    cudaMallocManaged(&pixels, numPixels*4*sizeof(uint8_t));
 
     for (int u = 0; u < WINDOW_WIDTH; u++)
     {
@@ -26,15 +27,21 @@ int main()
         trailMap[v*WINDOW_WIDTH+u].y = v;
         trailMap[v*WINDOW_WIDTH+u].val = 0;
         trailMap[v*WINDOW_WIDTH+u].sense = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].x = u;
+        trailMapUpdated[v*WINDOW_WIDTH+u].y = v;
+        trailMapUpdated[v*WINDOW_WIDTH+u].val = 0;
+        trailMapUpdated[v*WINDOW_WIDTH+u].sense = 0;
       }
     }
 
     uint random;
     for (uint i = 0; i < numAgents; i++)
     {
-      agents[i].position.x = (uint) ((float) rand()/RAND_MAX * WINDOW_WIDTH*1)+WINDOW_WIDTH*0;
-      agents[i].position.y = (uint) ((float) rand()/RAND_MAX * WINDOW_HEIGHT*1)+WINDOW_HEIGHT*0;
-      agents[i].angle = (uint) ((float) rand()/RAND_MAX * 2 * M_PI);
+      // agents[i].position.x = (uint) ((float) rand()/RAND_MAX * WINDOW_WIDTH*1)+WINDOW_WIDTH*0;
+      // agents[i].position.y = (uint) ((float) rand()/RAND_MAX * WINDOW_HEIGHT*1)+WINDOW_HEIGHT*0;
+      agents[i].position.x = WINDOW_WIDTH/2;
+      agents[i].position.y = WINDOW_HEIGHT/2;
+      agents[i].angle = ((float) rand()/RAND_MAX * 2 * M_PI);
     }
 
     sf::Image img;
@@ -62,7 +69,7 @@ int main()
         }
       }
       
-      CUDA::wrapper(numAgents, agents, trailMap, pixels);
+      CUDA::wrapper(numAgents, agents, trailMap, trailMapUpdated, pixels);
       texture.update(pixels);
       sprite.setTexture(texture);
       window.clear(sf::Color::White);
@@ -80,6 +87,7 @@ int main()
 
     cudaFree(agents);
     cudaFree(trailMap);
+    cudaFree(trailMapUpdated);
     cudaFree(pixels);
 
     return 0;

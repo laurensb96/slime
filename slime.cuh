@@ -1,4 +1,3 @@
-#pragma once
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
@@ -13,8 +12,8 @@
 #define DELTA_TIME 0.02f
 
 #define MOVE_SPEED 50.f
-#define TURN_SPEED 30.f
-#define DIFFUSE_SPEED 5.f
+#define TURN_SPEED 20.f
+#define DIFFUSE_SPEED 20.f
 #define EVAPORATE_SPEED 50.f
 
 struct Agent {
@@ -24,11 +23,11 @@ struct Agent {
 
 struct TrailMap {
     uint x, y;
-    sf::Uint8 val;
+    uint8_t val;
     uint sense;
 };
 
 namespace CUDA {
-    void wrapper(uint n, struct Agent *agents, struct TrailMap *trailMap, sf::Uint8 *pixels);
+    void wrapper(uint n, struct Agent *agents, struct TrailMap *trailMap, struct TrailMap *trailMapUpdated, sf::Uint8 *pixels);
 }
 
