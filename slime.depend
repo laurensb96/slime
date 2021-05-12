@@ -12,8 +12,9 @@
 1620773390 source:/home/laurens/Documents/CodeBlocks/slime/slime.cu
 	"slime.cuh"
 
-1620773858 source:/home/laurens/Documents/CodeBlocks/slime/gpu.cu
+1620807962 source:/home/laurens/Documents/CodeBlocks/slime/gpu.cu
 	"main.hpp"
+	"vector_overloads.hpp"
 
 1620756136 /home/laurens/Documents/CodeBlocks/slime/main.hpp
 	"cuda_runtime.h"
@@ -21,4 +22,8 @@
 	<iostream>
 	<SFML/Graphics.hpp>
 	<math.h>
+
+1620808011 /home/laurens/Documents/CodeBlocks/slime/vector_overloads.hpp
+	"cuda_runtime.h"
+	"device_launch_parameters.h"
 

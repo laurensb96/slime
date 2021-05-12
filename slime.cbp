@@ -10,9 +10,10 @@
 				<Option output="bin/Debug/slime" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
-				<Option compiler="gcc" />
+				<Option compiler="nvidia_nvcc_cuda_compiler" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="/home/laurens/Documents/CodeBlocks/slime/" />
 				</Compiler>
 				<Linker>
 					<Add library="sfml-graphics" />
@@ -36,12 +37,13 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Compiler>
-		</Compiler>
-		<Unit filename="cb.bmp" />
+		<Unit filename="gpu.cu">
+			<Option compile="1" />
+			<Option link="1" />
+		</Unit>
+		<Unit filename="gpu_overloads.cuh" />
 		<Unit filename="main.cpp" />
-		<Unit filename="slime.cu" />
-		<Unit filename="slime.cuh" />
+		<Unit filename="main.hpp" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
