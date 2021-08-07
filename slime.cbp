@@ -41,7 +41,7 @@
 			<Option compile="1" />
 			<Option link="1" />
 		</Unit>
-		<Unit filename="gpu_overloads.cuh" />
+		<Unit filename="gpu_math.cuh" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.hpp" />
 		<Extensions />
